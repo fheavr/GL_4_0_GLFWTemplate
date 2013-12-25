@@ -7,37 +7,51 @@
 #include <stdlib.h>
 #include <cmath>
 
-namespace ControlState
-{
+ControlState c_state = ControlState();
 
-int ControlState_init(WorldState &w)
+ControlState::~ControlState()
 {
-    c_state.w = &w;
+    glfwDestroyWindow(window);
+}
+
+int ControlState::init(WorldState &w)
+{
+    this->w = &w;
 
     /* As of right now we only have one window */
-    c_state.window = glfwCreateWindow(640, 480, "Window", NULL, NULL);
-    if (!c_state.window)
+    window = glfwCreateWindow(640, 480, "Window", NULL, NULL);
+    if (!window)
     {
         glfwTerminate();
         fputs("failed to initialize window", stderr);
         return 1; // error
     }
-    glfwMakeContextCurrent(c_state.window);
+    glfwMakeContextCurrent(window);
 
     // bind all callbacks
-    glfwSetKeyCallback(c_state.window, key_callback);
-    glfwSetFramebufferSizeCallback(c_state.window, reshape_callback);
-    glfwSetCursorPosCallback(c_state.window, mousePos_callback);
-    glfwSetMouseButtonCallback(c_state.window, mouseBtn_callback);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetFramebufferSizeCallback(window, reshape_callback);
+    glfwSetCursorPosCallback(window, mousePos_callback);
+    glfwSetMouseButtonCallback(window, mouseBtn_callback);
 
     return 0;
 }
 
-int ControlState_destroy()
+int ControlState::deltaArrLR()
 {
-    glfwDestroyWindow(c_state.window);
+    return arrR - arrL;
+}
 
-    return 0;
+int ControlState::deltaArrUD()
+{
+    return arrD - arrU;
+}
+
+void ControlState::updateView(float dTheta, float dPhi, float dDepth)
+{
+    viewTheta = fmod(viewTheta + 360 + float(dTheta), 360);
+    viewPhi   = std::min(90.0f, std::max(-90.0f, viewPhi + dPhi));
+    viewDepth += dDepth;
 }
 
 /*****************************************************************************
@@ -50,7 +64,7 @@ static void error_callback(int error, const char* desc)
 }
 
 // callback when window is resized
-void reshape_callback( GLFWwindow* window, int w, int h )
+void reshape_callback(GLFWwindow* window, int w, int h)
 {
     c_state.height = h;
     c_state.width  = w;
@@ -105,6 +119,3 @@ static void mousePos_callback(GLFWwindow* win, double x, double y)
     c_state.mouseX = x;
     c_state.mouseY = y;
 }
-
-
-} // namespace ControlState

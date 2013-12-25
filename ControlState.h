@@ -10,14 +10,15 @@
 /* due to GLFW/glut/most windowing systems being c based it is infeasible to store 
  * all the control state within a class and pass member function pointers (the c 
  * interface does not allow it) the solution, as only one instance is needed and 
- * the callbacks may need to to be static, is to encapsulate a number of
- * static functions within a namespace.
+ * the callbacks need to to be static, is to encapsulate a number of
+ * static functions within a namespace. Yes it is gross. Live with it. :)
  */
-namespace ControlState
-{
+#define DEGREES_PER_SECOND 100
+#define DEPTH_PER_SECOND 3
 
-struct ControlState
+class ControlState
 {
+public:
     float viewTheta;
     float viewPhi;
     float viewDepth;
@@ -54,11 +55,15 @@ struct ControlState
           mouseBtnR(0),
           window(NULL), w(NULL)
     {}
-};
-static ControlState c_state;
 
-int ControlState_init(WorldState &w);
-int ControlState_destroy();
+    ~ControlState();
+    int init(WorldState &w);
+
+    int deltaArrLR();
+    int deltaArrUD();
+    void updateView(float dTheta, float dPhi, float dDepth);
+};
+extern ControlState c_state;
 
 /* GLFW callback funtions */
 static void error_callback(int error, const char* desc);
@@ -66,7 +71,5 @@ static void reshape_callback(GLFWwindow* win, int w, int h);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 static void mouseBtn_callback(GLFWwindow* win, int button, int action, int mod);
 static void mousePos_callback(GLFWwindow* win, double x, double y);
-
-} // namespace ControlState
 
 #endif // CONTROL_STATE_H
