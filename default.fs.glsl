@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 // Copyright (c) Russell Gillette
 // December 2013

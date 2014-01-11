@@ -1,5 +1,17 @@
 /* Copyright (c) Russell Gillette
  * December 2013
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+ * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "ControlState.h"
@@ -18,8 +30,10 @@ int ControlState::init(WorldState &w)
 {
     this->w = &w;
 
+    width  = 640;
+    height = 480;
     /* As of right now we only have one window */
-    window = glfwCreateWindow(640, 480, "Window", NULL, NULL);
+    window = glfwCreateWindow(width, height, "Window", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -33,6 +47,7 @@ int ControlState::init(WorldState &w)
     glfwSetFramebufferSizeCallback(window, reshape_callback);
     glfwSetCursorPosCallback(window, mousePos_callback);
     glfwSetMouseButtonCallback(window, mouseBtn_callback);
+    glfwSetScrollCallback(window, mouseScroll_callback);
 
     return 0;
 }
@@ -80,8 +95,51 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     /* key code goes here */
 
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    switch(key)
+    {
+    case GLFW_KEY_ESCAPE:
         glfwSetWindowShouldClose(window, GL_TRUE);
+        break;
+    case GLFW_KEY_LEFT:
+        c_state.arrL = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_RIGHT:
+        c_state.arrR = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_UP:
+        c_state.arrU = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_DOWN:
+        c_state.arrD = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_W:
+        c_state.gemMove[2] = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_A:
+        c_state.gemMove[0] = (action == GLFW_RELEASE) ? 0 : -1;
+        break;
+    case GLFW_KEY_S:
+        c_state.gemMove[2] = (action == GLFW_RELEASE) ? 0 : -1;
+        break;
+    case GLFW_KEY_D:
+        c_state.gemMove[0] = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_X:
+        c_state.gemMove[1] = (action == GLFW_RELEASE) ? 0 : -1;
+        break;
+    case GLFW_KEY_C:
+        c_state.gemMove[1] = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_R:
+        c_state.gemMove[1] = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_EQUAL:
+        c_state.gemRadius = (action == GLFW_RELEASE) ? 0 : 1;
+        break;
+    case GLFW_KEY_MINUS:
+        c_state.gemRadius = (action == GLFW_RELEASE) ? 0 : -1;
+        break;
+    }
 }
 
 // callback when a mouse button is pressed
@@ -118,4 +176,9 @@ static void mousePos_callback(GLFWwindow* win, double x, double y)
 
     c_state.mouseX = x;
     c_state.mouseY = y;
+}
+
+static void mouseScroll_callback(GLFWwindow* win, double x_offset, double y_offset)
+{
+    c_state.mouseScroll = y_offset/20;
 }
